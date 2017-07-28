@@ -110,6 +110,7 @@ void main()
 			case Up:
 				SetDevPov(hDev, 1, 0.0f);
 				break;
+
 			case Up | Right:
 				SetDevPov(hDev, 1, 45.0f);
 				break;
