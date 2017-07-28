@@ -33,18 +33,18 @@ HANDLE findTrio();
 
 enum TrioDreamcast : uint16_t
 {
-	Start = 0x0002,
-	Up    = 0x0010,
-	Right = 0x0020,
-	Down  = 0x0040,
-	Left  = 0x0080,
+	Start = 0x0200,
+	Up    = 0x1000,
+	Right = 0x2000,
+	Down  = 0x4000,
+	Left  = 0x8000,
 	DPad  = Up | Right | Down | Left,
-	Y     = 0x0100,
-	B     = 0x0200,
-	A     = 0x0400,
-	X     = 0x0800,
-	LT    = 0x1000,
-	RT    = 0x2000
+	Y     = 0x0001,
+	B     = 0x0002,
+	A     = 0x0004,
+	X     = 0x0008,
+	LT    = 0x0010,
+	RT    = 0x0020
 };
 
 void main()
@@ -99,6 +99,8 @@ void main()
 		SetDevButton(hDev, 2, !!(buttons & TrioDreamcast::B));
 		SetDevButton(hDev, 3, !!(buttons & TrioDreamcast::X));
 		SetDevButton(hDev, 4, !!(buttons & TrioDreamcast::Y));
+		SetDevButton(hDev, 5, !!(buttons & TrioDreamcast::LT));
+		SetDevButton(hDev, 6, !!(buttons & TrioDreamcast::RT));
 		SetDevButton(hDev, 8, !!(buttons & TrioDreamcast::Start));
 
 		switch (buttons & TrioDreamcast::DPad)
