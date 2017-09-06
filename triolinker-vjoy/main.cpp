@@ -15,7 +15,7 @@ struct Handle
 {
 	HANDLE handle;
 
-	Handle(HANDLE handle)
+	explicit Handle(HANDLE handle)
 	{
 		this->handle = handle;
 	}
@@ -47,23 +47,41 @@ enum TrioDreamcast : uint16_t
 	RT    = 0x0020
 };
 
-void main()
+
+int main(int argc, char** argv)
 {
+	bool hide = false;
+	bool xinput = false;
+
+	for (int i = 1; i < argc; i++)
+	{
+		if (!_strcmpi(argv[i], "--hide"))
+		{
+			hide = true;
+		}
+		else if (!_strcmpi(argv[i], "--xinput") || _strcmpi(argv[i], "-x"))
+		{
+			xinput = true;
+		}
+	}
+
+	const DevType devType = xinput ? DevType::vXbox : DevType::vJoy;
+
 	HDEVICE hDev;
-	auto r = AcquireDev(1, DevType::vJoy, &hDev);
+	const auto r = AcquireDev(1, devType, &hDev);
 
 	if (r != 0)
 	{
 		cout << "idk fam" << endl;
-		return;
+		return -1;
 	}
 
-	Handle trio(findTrio());
+	const Handle trio(findTrio());
 
 	if (trio.handle == nullptr)
 	{
 		cout << "Unable to detect Trio Linker." << endl;
-		return;
+		return -2;
 	}
 
 	cout << "Trio Linker detected." << endl;
@@ -74,23 +92,25 @@ void main()
 	if (!HidD_GetPreparsedData(trio.handle, &ptr))
 	{
 		cout << "HidD_GetPreparsedData failed." << endl;
-		return;
+		return -3;
 	}
 
 	HidP_GetCaps(ptr, &caps);
 	HidD_FreePreparsedData(ptr);
 
-	cout << "InputReportByteLength: " << caps.InputReportByteLength << endl;
-	system("pause");
+	if (hide)
+	{
+		ShowWindow(GetConsoleWindow(), SW_HIDE);
+	}
 
 	DWORD dummy;
 	vector<uint8_t> buffer(caps.InputReportByteLength);
 
 	while (ReadFile(trio.handle, buffer.data(), static_cast<DWORD>(buffer.size()), &dummy, nullptr))
 	{
-		uint16_t buttons = *(uint16_t*)&buffer[1];
-		uint8_t x = buffer[3];
-		uint8_t y = buffer[4];
+		const uint16_t buttons = *(uint16_t*)&buffer[1];
+		const auto x = buffer[3];
+		const auto y = buffer[4];
 
 		SetDevAxis(hDev, 1, 100.0f * (x / 255.0f));
 		SetDevAxis(hDev, 2, 100.0f * (y / 255.0f));
@@ -144,8 +164,14 @@ void main()
 		}
 	}
 
+	if (hide)
+	{
+		ShowWindow(GetConsoleWindow(), SW_SHOW);
+	}
+
 	cout << "Failed to read data from device." << endl;
 	RelinquishDev(hDev);
+	return 0;
 }
 
 wstring getDevicePath(HDEVINFO handle, SP_DEVICE_INTERFACE_DATA* interface)
@@ -154,7 +180,12 @@ wstring getDevicePath(HDEVINFO handle, SP_DEVICE_INTERFACE_DATA* interface)
 
 	SetupDiGetDeviceInterfaceDetail(handle, interface, nullptr, 0, &size, nullptr);
 
-	auto detail = static_cast<PSP_DEVICE_INTERFACE_DETAIL_DATA>(malloc(offsetof(SP_DEVICE_INTERFACE_DETAIL_DATA, DevicePath) + size + sizeof(TCHAR)));
+	const auto detail_size =
+		offsetof(SP_DEVICE_INTERFACE_DETAIL_DATA, DevicePath)
+		+ size
+		+ sizeof(TCHAR);
+
+	auto detail = static_cast<PSP_DEVICE_INTERFACE_DETAIL_DATA>(malloc(detail_size));
 	detail->cbSize = sizeof(SP_DEVICE_INTERFACE_DETAIL_DATA);
 
 	bool success = SetupDiGetDeviceInterfaceDetail(handle, interface, detail, size, &size, nullptr);
@@ -175,7 +206,7 @@ HANDLE findTrio()
 	GUID guid = {};
 	HidD_GetHidGuid(&guid);
 
-	HDEVINFO devInfoSet = SetupDiGetClassDevs(&guid, nullptr, nullptr, DIGCF_PRESENT | DIGCF_DEVICEINTERFACE);
+	const HDEVINFO devInfoSet = SetupDiGetClassDevs(&guid, nullptr, nullptr, DIGCF_PRESENT | DIGCF_DEVICEINTERFACE);
 
 	if (devInfoSet == reinterpret_cast<HDEVINFO>(-1))
 	{
@@ -195,7 +226,7 @@ HANDLE findTrio()
 		{
 			wstring path(move(getDevicePath(devInfoSet, &interfaceData)));
 
-			auto handle = CreateFile(path.c_str(), GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE,
+			const auto handle = CreateFile(path.c_str(), GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE,
 				nullptr, OPEN_EXISTING, 0, nullptr);
 
 			if (handle == nullptr || handle == reinterpret_cast<HANDLE>(-1))
