@@ -80,6 +80,7 @@
     <Link>
       <AdditionalDependencies>hid.lib;setupapi.lib;vGenInterface.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)vGen\SDK\$(PlatformTarget)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <SubSystem>Console</SubSystem>
     </Link>
     <PreBuildEvent>
       <Command>xcopy /C /Y /D "$(SolutionDir)vGen\SDK\$(PlatformTarget)\vGenInterface.dll" "$(OutDir)"</Command>
@@ -95,6 +96,7 @@
     <Link>
       <AdditionalDependencies>hid.lib;setupapi.lib;vGenInterface.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)vGen\SDK\$(PlatformTarget)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <SubSystem>Console</SubSystem>
     </Link>
     <PreBuildEvent>
       <Command>xcopy /C /Y /D "$(SolutionDir)vGen\SDK\$(PlatformTarget)\vGenInterface.dll" "$(OutDir)"</Command>
@@ -114,6 +116,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>hid.lib;setupapi.lib;vGenInterface.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)vGen\SDK\$(PlatformTarget)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <SubSystem>Console</SubSystem>
     </Link>
     <PreBuildEvent>
       <Command>xcopy /C /Y /D "$(SolutionDir)vGen\SDK\$(PlatformTarget)\vGenInterface.dll" "$(OutDir)"</Command>
@@ -133,6 +136,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>hid.lib;setupapi.lib;vGenInterface.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)vGen\SDK\$(PlatformTarget)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <SubSystem>Console</SubSystem>
     </Link>
     <PreBuildEvent>
       <Command>xcopy /C /Y /D "$(SolutionDir)vGen\SDK\$(PlatformTarget)\vGenInterface.dll" "$(OutDir)"</Command>
