@@ -112,8 +112,18 @@ int main(int argc, char** argv)
 		const auto x = buffer[3];
 		const auto y = buffer[4];
 
-		SetDevAxis(hDev, 1, 100.0f * (x / 255.0f));
-		SetDevAxis(hDev, 2, 100.0f * (y / 255.0f));
+		// The adapter outputs analog data when the d-pad is pressed,
+		// so just ignore that and center the axis.
+		if (buttons & TrioDreamcast::DPad)
+		{
+			SetDevAxis(hDev, 1, 50.0f);
+			SetDevAxis(hDev, 2, 50.0f);
+		}
+		else
+		{
+			SetDevAxis(hDev, 1, 100.0f * (x / 255.0f));
+			SetDevAxis(hDev, 2, 100.0f * (y / 255.0f));
+		}
 
 		SetDevButton(hDev, 1, !!(buttons & TrioDreamcast::A));
 		SetDevButton(hDev, 2, !!(buttons & TrioDreamcast::B));
