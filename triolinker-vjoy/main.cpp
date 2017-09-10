@@ -7,6 +7,7 @@
 #include <Xinput.h>
 #include <hidsdi.h>
 #include <SetupAPI.h>
+#include "IniFile.hpp"
 #include <vGenInterface.h>
 
 using namespace std;
@@ -47,23 +48,30 @@ enum TrioDreamcast : uint16_t
 	RT    = 0x0020
 };
 
+string getCurrentDirectoryOnWindows()
+{
+	char working_directory[MAX_PATH + 1];
+	GetCurrentDirectoryA(sizeof(working_directory), working_directory); // **** win32 specific ****
+	return working_directory;
+}
 
 int main(int argc, char** argv)
 {
 	bool hide = false;
 	bool xinput = false;
+	bool unlinkdpad = true;
+	float DefaultX = 50.0f;
+	float DefaultY = 50.0f;
+	std::string path = getCurrentDirectoryOnWindows();
 
-	for (int i = 1; i < argc; i++)
-	{
-		if (!_strcmpi(argv[i], "--hide"))
-		{
-			hide = true;
-		}
-		else if (!_strcmpi(argv[i], "--xinput") || _strcmpi(argv[i], "-x"))
-		{
-			xinput = true;
-		}
-	}
+	CopyFileA((std::string(path) + "\\default.ini").c_str(), (std::string(path) + "\\config.ini").c_str(), true);
+	const IniFile *config = new IniFile(std::string(path) + "\\config.ini");
+	hide = config->getBool("", "HideWindow", true);
+	xinput = config->getBool("", "XInput", true);
+	unlinkdpad = config->getBool("", "UnlinkDpad", true);
+	DefaultX = config->getFloat("", "DefaultX", 50.0f);
+	DefaultY = config->getFloat("", "DefaultY", 50.0f);
+	delete config;
 
 	const DevType devType = xinput ? DevType::vXbox : DevType::vJoy;
 
@@ -114,10 +122,10 @@ int main(int argc, char** argv)
 
 		// The adapter outputs analog data when the d-pad is pressed,
 		// so just ignore that and center the axis.
-		if (buttons & TrioDreamcast::DPad)
+		if (unlinkdpad == true && buttons & TrioDreamcast::DPad)
 		{
-			SetDevAxis(hDev, 1, 50.0f);
-			SetDevAxis(hDev, 2, 50.0f);
+			SetDevAxis(hDev, 1, DefaultX);
+			SetDevAxis(hDev, 2, DefaultX);
 		}
 		else
 		{
