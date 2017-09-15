@@ -7,8 +7,10 @@
 #include <Xinput.h>
 #include <hidsdi.h>
 #include <SetupAPI.h>
-#include "IniFile.hpp"
+
 #include <vGenInterface.h>
+
+#include "IniFile.hpp"
 
 using namespace std;
 
