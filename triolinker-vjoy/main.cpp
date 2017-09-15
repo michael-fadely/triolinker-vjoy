@@ -55,7 +55,7 @@ int main(int argc, char** argv)
 	const IniFile config("config.ini");
 	const bool hide = config.getBool("", "HideWindow", true);
 	const bool xinput = config.getBool("", "XInput", true);
-	const bool unlinkdpad = config.getBool("", "UnlinkDpad", true);
+	const bool unlinkDpad = config.getBool("", "UnlinkDpad", true);
 	const float defaultX = config.getFloat("", "DefaultX", 50.0f);
 	const float defaultY = config.getFloat("", "DefaultY", 50.0f);
 
@@ -108,7 +108,7 @@ int main(int argc, char** argv)
 
 		// The adapter outputs analog data when the d-pad is pressed,
 		// so just ignore that and center the axis.
-		if (unlinkdpad == true && buttons & TrioDreamcast::DPad)
+		if (unlinkDpad == true && buttons & TrioDreamcast::DPad)
 		{
 			SetDevAxis(hDev, 1, defaultX);
 			SetDevAxis(hDev, 2, defaultY);
