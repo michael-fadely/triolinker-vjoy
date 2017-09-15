@@ -57,10 +57,10 @@ string getCurrentDirectoryOnWindows()
 
 int main(int argc, char** argv)
 {
-	std::string path = getCurrentDirectoryOnWindows();
+	string path = getCurrentDirectoryOnWindows();
 
-	CopyFileA((std::string(path) + "\\default.ini").c_str(), (std::string(path) + "\\config.ini").c_str(), true);
-	const IniFile *config = new IniFile(std::string(path) + "\\config.ini");
+	CopyFileA((path + "\\default.ini").c_str(), (path + "\\config.ini").c_str(), true);
+	const IniFile *config = new IniFile(path + "\\config.ini");
 	const bool hide = config->getBool("", "HideWindow", true);
 	const bool xinput = config->getBool("", "XInput", true);
 	const bool unlinkdpad = config->getBool("", "UnlinkDpad", true);
