@@ -48,20 +48,11 @@ enum TrioDreamcast : uint16_t
 	RT    = 0x0020
 };
 
-string getCurrentDirectoryOnWindows()
-{
-	char working_directory[MAX_PATH + 1];
-	GetCurrentDirectoryA(sizeof(working_directory), working_directory); // **** win32 specific ****
-	return working_directory;
-}
-
 int main(int argc, char** argv)
 {
-	string path = getCurrentDirectoryOnWindows();
+	CopyFileA("default.ini", "config.ini", true);
 
-	CopyFileA((path + "\\default.ini").c_str(), (path + "\\config.ini").c_str(), true);
-
-	const IniFile config(path + "\\config.ini");
+	const IniFile config("config.ini");
 	const bool hide = config.getBool("", "HideWindow", true);
 	const bool xinput = config.getBool("", "XInput", true);
 	const bool unlinkdpad = config.getBool("", "UnlinkDpad", true);
