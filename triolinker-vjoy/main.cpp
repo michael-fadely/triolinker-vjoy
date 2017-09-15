@@ -120,7 +120,7 @@ int main(int argc, char** argv)
 		if (unlinkdpad == true && buttons & TrioDreamcast::DPad)
 		{
 			SetDevAxis(hDev, 1, DefaultX);
-			SetDevAxis(hDev, 2, DefaultX);
+			SetDevAxis(hDev, 2, DefaultY);
 		}
 		else
 		{
