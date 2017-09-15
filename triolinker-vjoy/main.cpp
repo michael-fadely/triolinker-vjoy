@@ -64,8 +64,8 @@ int main(int argc, char** argv)
 	const bool hide = config->getBool("", "HideWindow", true);
 	const bool xinput = config->getBool("", "XInput", true);
 	const bool unlinkdpad = config->getBool("", "UnlinkDpad", true);
-	const float DefaultX = config->getFloat("", "DefaultX", 50.0f);
-	const float DefaultY = config->getFloat("", "DefaultY", 50.0f);
+	const float defaultX = config->getFloat("", "DefaultX", 50.0f);
+	const float defaultY = config->getFloat("", "DefaultY", 50.0f);
 	delete config;
 
 	const DevType devType = xinput ? DevType::vXbox : DevType::vJoy;
@@ -119,8 +119,8 @@ int main(int argc, char** argv)
 		// so just ignore that and center the axis.
 		if (unlinkdpad == true && buttons & TrioDreamcast::DPad)
 		{
-			SetDevAxis(hDev, 1, DefaultX);
-			SetDevAxis(hDev, 2, DefaultY);
+			SetDevAxis(hDev, 1, defaultX);
+			SetDevAxis(hDev, 2, defaultY);
 		}
 		else
 		{
