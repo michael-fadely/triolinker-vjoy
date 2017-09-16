@@ -7,8 +7,10 @@
 #include <Xinput.h>
 #include <hidsdi.h>
 #include <SetupAPI.h>
-#include "IniFile.hpp"
+
 #include <vGenInterface.h>
+
+#include "IniFile.hpp"
 
 using namespace std;
 
@@ -48,30 +50,16 @@ enum TrioDreamcast : uint16_t
 	RT    = 0x0020
 };
 
-string getCurrentDirectoryOnWindows()
-{
-	char working_directory[MAX_PATH + 1];
-	GetCurrentDirectoryA(sizeof(working_directory), working_directory); // **** win32 specific ****
-	return working_directory;
-}
-
 int main(int argc, char** argv)
 {
-	bool hide = false;
-	bool xinput = false;
-	bool unlinkdpad = true;
-	float DefaultX = 50.0f;
-	float DefaultY = 50.0f;
-	std::string path = getCurrentDirectoryOnWindows();
+	CopyFileA("default.ini", "config.ini", true);
 
-	CopyFileA((std::string(path) + "\\default.ini").c_str(), (std::string(path) + "\\config.ini").c_str(), true);
-	const IniFile *config = new IniFile(std::string(path) + "\\config.ini");
-	hide = config->getBool("", "HideWindow", true);
-	xinput = config->getBool("", "XInput", true);
-	unlinkdpad = config->getBool("", "UnlinkDpad", true);
-	DefaultX = config->getFloat("", "DefaultX", 50.0f);
-	DefaultY = config->getFloat("", "DefaultY", 50.0f);
-	delete config;
+	const IniFile config("config.ini");
+	const bool hide = config.getBool("", "HideWindow", true);
+	const bool xinput = config.getBool("", "XInput", true);
+	const bool unlinkDpad = config.getBool("", "UnlinkDpad", true);
+	const float defaultX = config.getFloat("", "DefaultX", 50.0f);
+	const float defaultY = config.getFloat("", "DefaultY", 50.0f);
 
 	const DevType devType = xinput ? DevType::vXbox : DevType::vJoy;
 
@@ -122,10 +110,10 @@ int main(int argc, char** argv)
 
 		// The adapter outputs analog data when the d-pad is pressed,
 		// so just ignore that and center the axis.
-		if (unlinkdpad == true && buttons & TrioDreamcast::DPad)
+		if (unlinkDpad == true && buttons & TrioDreamcast::DPad)
 		{
-			SetDevAxis(hDev, 1, DefaultX);
-			SetDevAxis(hDev, 2, DefaultX);
+			SetDevAxis(hDev, 1, defaultX);
+			SetDevAxis(hDev, 2, defaultY);
 		}
 		else
 		{

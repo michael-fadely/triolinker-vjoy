@@ -29,5 +29,8 @@
     <ClInclude Include="IniFile.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="TextConv.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
