@@ -1,6 +1,6 @@
 # triolinker-vjoy
 
-*triolinker-vjoy* is a feeder for VJoy to enable EMS Trio Linker to work on modern systems as the drivers for the original Trio Linker do not support 64-bit Windows.
+*triolinker-vjoy* is a feeder for the VJoy driver to enable EMS Trio Linker to work on modern systems as the drivers for the original Trio Linker do not support 64-bit Windows.
 
 ### Compatibility
 - EMS Trio Linker model 0403 (USB VID_7701 PID_0003) only
