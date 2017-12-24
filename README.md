@@ -13,10 +13,11 @@
 ### Configuring vJoy
 - Download and install the latest version of vJoy from the link above
 - Run "Configure vJoy" from the Start Menu, Tick "Enable vJoy" and add a new VJoy device
-- Configure the device to have the following (for a Dreamcast controller):
-Axes: X and Y only
-Buttons: 8 buttons
-POV: Continuous, 1
+
+Configure the device to have the following (for a Dreamcast controller):
+- Axes: X and Y only
+- Buttons: 8 buttons
+- POV: Continuous, 1
 
 ### Configuring the feeder
 You can edit config.ini in the feeder's folder to add the following options:
