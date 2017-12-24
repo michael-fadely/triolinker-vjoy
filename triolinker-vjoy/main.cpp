@@ -32,8 +32,6 @@ struct Handle
 	}
 };
 
-HANDLE findTrio();
-
 enum TrioDreamcast : uint16_t
 {
 	Start = 0x0200,
@@ -50,16 +48,19 @@ enum TrioDreamcast : uint16_t
 	RT    = 0x0020
 };
 
+HANDLE findTrio();
+
 int main(int argc, char** argv)
 {
 	CopyFileA("default.ini", "config.ini", true);
 
 	const IniFile config("config.ini");
-	const bool hide = config.getBool("", "HideWindow", true);
-	const bool xinput = config.getBool("", "XInput", true);
-	const bool unlinkDpad = config.getBool("", "UnlinkDpad", true);
-	const float defaultX = config.getFloat("", "DefaultX", 50.0f);
-	const float defaultY = config.getFloat("", "DefaultY", 50.0f);
+
+	const bool  hide       = config.getBool("", "HideWindow", true);
+	const bool  xinput     = config.getBool("", "XInput", true);
+	const bool  unlinkDpad = config.getBool("", "UnlinkDpad", true);
+	const float defaultX   = config.getFloat("", "DefaultX", 50.0f);
+	const float defaultY   = config.getFloat("", "DefaultY", 50.0f);
 
 	const DevType devType = xinput ? DevType::vXbox : DevType::vJoy;
 
@@ -81,8 +82,8 @@ int main(int argc, char** argv)
 	}
 
 	cout << "Trio Linker detected." << endl;
-	
-	HIDP_CAPS caps = {};
+
+	HIDP_CAPS caps {};
 	PHIDP_PREPARSED_DATA ptr = nullptr;
 
 	if (!HidD_GetPreparsedData(trio.handle, &ptr))
@@ -104,13 +105,13 @@ int main(int argc, char** argv)
 
 	while (ReadFile(trio.handle, buffer.data(), static_cast<DWORD>(buffer.size()), &dummy, nullptr))
 	{
-		const uint16_t buttons = *(uint16_t*)&buffer[1];
+		const uint16_t buttons = *reinterpret_cast<uint16_t*>(&buffer[1]);
 		const auto x = buffer[3];
 		const auto y = buffer[4];
 
 		// The adapter outputs analog data when the d-pad is pressed,
 		// so just ignore that and center the axis.
-		if (unlinkDpad == true && buttons & TrioDreamcast::DPad)
+		if (unlinkDpad && buttons & TrioDreamcast::DPad)
 		{
 			SetDevAxis(hDev, 1, defaultX);
 			SetDevAxis(hDev, 2, defaultY);
@@ -147,7 +148,7 @@ int main(int argc, char** argv)
 				SetDevPov(hDev, 1, 90.0f);
 				break;
 
-			case Right|Down:
+			case Right | Down:
 				SetDevPov(hDev, 1, 135.0f);
 				break;
 
@@ -155,7 +156,7 @@ int main(int argc, char** argv)
 				SetDevPov(hDev, 1, 180.0f);
 				break;
 
-			case Down|Left:
+			case Down | Left:
 				SetDevPov(hDev, 1, 225.0f);
 				break;
 
@@ -163,10 +164,9 @@ int main(int argc, char** argv)
 				SetDevPov(hDev, 1, 270.0f);
 				break;
 
-			case Left|Up:
+			case Left | Up:
 				SetDevPov(hDev, 1, 315.0f);
 				break;
-
 		}
 	}
 
@@ -200,7 +200,7 @@ wstring getDevicePath(HDEVINFO handle, SP_DEVICE_INTERFACE_DATA* interface)
 
 	if (success)
 	{
-		result = move(wstring(detail->DevicePath));
+		result = wstring(detail->DevicePath);
 	}
 
 	free(detail);
@@ -209,7 +209,7 @@ wstring getDevicePath(HDEVINFO handle, SP_DEVICE_INTERFACE_DATA* interface)
 
 HANDLE findTrio()
 {
-	GUID guid = {};
+	GUID guid {};
 	HidD_GetHidGuid(&guid);
 
 	const HDEVINFO devInfoSet = SetupDiGetClassDevs(&guid, nullptr, nullptr, DIGCF_PRESENT | DIGCF_DEVICEINTERFACE);
@@ -219,21 +219,21 @@ HANDLE findTrio()
 		return nullptr;
 	}
 
-	SP_DEVINFO_DATA info = {};
+	SP_DEVINFO_DATA info {};
 	info.cbSize = sizeof(SP_DEVINFO_DATA);
 
 	for (size_t i = 0; SetupDiEnumDeviceInfo(devInfoSet, static_cast<DWORD>(i), &info); i++)
 	{
-		SP_DEVICE_INTERFACE_DATA interfaceData = {};
+		SP_DEVICE_INTERFACE_DATA interfaceData {};
 		interfaceData.cbSize = sizeof(SP_DEVICE_INTERFACE_DATA);
 
 		for (size_t j = 0; SetupDiEnumDeviceInterfaces(devInfoSet, &info, &guid,
 			static_cast<DWORD>(j), &interfaceData); j++)
 		{
-			wstring path(move(getDevicePath(devInfoSet, &interfaceData)));
+			wstring path(getDevicePath(devInfoSet, &interfaceData));
 
 			const auto handle = CreateFile(path.c_str(), GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE,
-				nullptr, OPEN_EXISTING, 0, nullptr);
+			                               nullptr, OPEN_EXISTING, 0, nullptr);
 
 			if (handle == nullptr || handle == reinterpret_cast<HANDLE>(-1))
 			{
@@ -243,7 +243,7 @@ HANDLE findTrio()
 			// ReSharper disable once CppInitializedValueIsAlwaysRewritten
 			Handle guard(handle);
 
-			HIDD_ATTRIBUTES attributes = {};
+			HIDD_ATTRIBUTES attributes {};
 			if (!HidD_GetAttributes(handle, &attributes))
 			{
 				continue;
