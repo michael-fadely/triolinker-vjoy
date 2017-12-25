@@ -117,15 +117,15 @@ int main(int argc, char** argv)
 		{
 			SetDevAxis(hDev, 1, defaultX);
 			SetDevAxis(hDev, 2, defaultY);
-			SetDevAxis(hDev, 3, 100.0f * (x2 / 255.0f));
-			SetDevAxis(hDev, 4, 100.0f * (y2 / 255.0f));
+			SetDevAxis(hDev, 7, 100.0f * (x2 / 255.0f));
+			SetDevAxis(hDev, 8, 100.0f * (y2 / 255.0f));
 		}
 		else
 		{
 			SetDevAxis(hDev, 1, 100.0f * (x1 / 255.0f));
 			SetDevAxis(hDev, 2, 100.0f * (y1 / 255.0f));
-			SetDevAxis(hDev, 3, 100.0f * (x2 / 255.0f));
-			SetDevAxis(hDev, 4, 100.0f * (y2 / 255.0f));
+			SetDevAxis(hDev, 7, 100.0f * (x2 / 255.0f));
+			SetDevAxis(hDev, 8, 100.0f * (y2 / 255.0f));
 		}
 		SetDevButton(hDev, 1, !!(buttons & TrioDreamcast::A));
 		SetDevButton(hDev, 2, !!(buttons & TrioDreamcast::B));
