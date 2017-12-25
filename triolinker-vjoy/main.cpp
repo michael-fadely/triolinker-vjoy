@@ -46,6 +46,7 @@ enum TrioDreamcast : uint16_t
 	B     = 0x0002,
 	A     = 0x0004,
 	X     = 0x0008,
+	Z     = 0x0080,
 	LT    = 0x0010,
 	RT    = 0x0020
 };
@@ -105,8 +106,10 @@ int main(int argc, char** argv)
 	while (ReadFile(trio.handle, buffer.data(), static_cast<DWORD>(buffer.size()), &dummy, nullptr))
 	{
 		const uint16_t buttons = *(uint16_t*)&buffer[1];
-		const auto x = buffer[3];
-		const auto y = buffer[4];
+		const auto x1 = buffer[3];
+		const auto y1 = buffer[4];
+		const auto x2 = buffer[5];
+		const auto y2 = buffer[6];
 
 		// The adapter outputs analog data when the d-pad is pressed,
 		// so just ignore that and center the axis.
@@ -114,19 +117,23 @@ int main(int argc, char** argv)
 		{
 			SetDevAxis(hDev, 1, defaultX);
 			SetDevAxis(hDev, 2, defaultY);
+			SetDevAxis(hDev, 3, 100.0f * (x2 / 255.0f));
+			SetDevAxis(hDev, 4, 100.0f * (y2 / 255.0f));
 		}
 		else
 		{
-			SetDevAxis(hDev, 1, 100.0f * (x / 255.0f));
-			SetDevAxis(hDev, 2, 100.0f * (y / 255.0f));
+			SetDevAxis(hDev, 1, 100.0f * (x1 / 255.0f));
+			SetDevAxis(hDev, 2, 100.0f * (y1 / 255.0f));
+			SetDevAxis(hDev, 3, 100.0f * (x2 / 255.0f));
+			SetDevAxis(hDev, 4, 100.0f * (y2 / 255.0f));
 		}
-
 		SetDevButton(hDev, 1, !!(buttons & TrioDreamcast::A));
 		SetDevButton(hDev, 2, !!(buttons & TrioDreamcast::B));
 		SetDevButton(hDev, 3, !!(buttons & TrioDreamcast::X));
 		SetDevButton(hDev, 4, !!(buttons & TrioDreamcast::Y));
 		SetDevButton(hDev, 5, !!(buttons & TrioDreamcast::LT));
 		SetDevButton(hDev, 6, !!(buttons & TrioDreamcast::RT));
+		SetDevButton(hDev, 7, !!(buttons & TrioDreamcast::Z));
 		SetDevButton(hDev, 8, !!(buttons & TrioDreamcast::Start));
 
 		switch (buttons & TrioDreamcast::DPad)
