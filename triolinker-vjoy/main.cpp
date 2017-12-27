@@ -34,7 +34,7 @@ struct Handle
 
 HANDLE findTrio();
 
-enum TrioDreamcast : uint16_t
+enum TrioController : uint16_t
 {
 	Start = 0x0200,
 	Up    = 0x1000,
@@ -58,7 +58,7 @@ int main(int argc, char** argv)
 	const IniFile config("config.ini");
 	const bool hide = config.getBool("", "HideWindow", true);
 	const bool xinput = config.getBool("", "XInput", true);
-	const bool unlinkDpad = config.getBool("", "UnlinkDpad", true);
+	const bool unlinkDpad = config.getBool("", "UnlinkDPad", true);
 	const float defaultX = config.getFloat("", "DefaultX", 50.0f);
 	const float defaultY = config.getFloat("", "DefaultY", 50.0f);
 
@@ -69,7 +69,7 @@ int main(int argc, char** argv)
 
 	if (r != 0)
 	{
-		cout << "idk fam" << endl;
+		cout << "USB device not found." << endl;
 		return -1;
 	}
 
@@ -113,30 +113,28 @@ int main(int argc, char** argv)
 
 		// The adapter outputs analog data when the d-pad is pressed,
 		// so just ignore that and center the axis.
-		if (unlinkDpad == true && buttons & TrioDreamcast::DPad)
+		if (unlinkDpad == true && buttons & TrioController::DPad)
 		{
 			SetDevAxis(hDev, 1, defaultX);
 			SetDevAxis(hDev, 2, defaultY);
-			SetDevAxis(hDev, 7, 100.0f * (x2 / 255.0f));
-			SetDevAxis(hDev, 8, 100.0f * (y2 / 255.0f));
 		}
 		else
 		{
 			SetDevAxis(hDev, 1, 100.0f * (x1 / 255.0f));
 			SetDevAxis(hDev, 2, 100.0f * (y1 / 255.0f));
-			SetDevAxis(hDev, 7, 100.0f * (x2 / 255.0f));
-			SetDevAxis(hDev, 8, 100.0f * (y2 / 255.0f));
 		}
-		SetDevButton(hDev, 1, !!(buttons & TrioDreamcast::A));
-		SetDevButton(hDev, 2, !!(buttons & TrioDreamcast::B));
-		SetDevButton(hDev, 3, !!(buttons & TrioDreamcast::X));
-		SetDevButton(hDev, 4, !!(buttons & TrioDreamcast::Y));
-		SetDevButton(hDev, 5, !!(buttons & TrioDreamcast::LT));
-		SetDevButton(hDev, 6, !!(buttons & TrioDreamcast::RT));
-		SetDevButton(hDev, 7, !!(buttons & TrioDreamcast::Z));
-		SetDevButton(hDev, 8, !!(buttons & TrioDreamcast::Start));
+		SetDevAxis(hDev, 4, 100.0f * (x2 / 255.0f));
+		SetDevAxis(hDev, 5, 100.0f * (y2 / 255.0f));
+		SetDevButton(hDev, 1, !!(buttons & TrioController::A));
+		SetDevButton(hDev, 2, !!(buttons & TrioController::B));
+		SetDevButton(hDev, 3, !!(buttons & TrioController::X));
+		SetDevButton(hDev, 4, !!(buttons & TrioController::Y));
+		SetDevButton(hDev, 5, !!(buttons & TrioController::LT));
+		SetDevButton(hDev, 6, !!(buttons & TrioController::RT));
+		SetDevButton(hDev, 7, !!(buttons & TrioController::Z));
+		SetDevButton(hDev, 8, !!(buttons & TrioController::Start));
 
-		switch (buttons & TrioDreamcast::DPad)
+		switch (buttons & TrioController::DPad)
 		{
 			default:
 				SetDevPov(hDev, 1, -1.0f);
