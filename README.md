@@ -25,11 +25,11 @@ You can edit config.ini in the feeder's folder to add the following options:
 - Experimental XInput support: XInput=true or XInput=false
 
 ### Linking and unlinking the D-Pad with the analog stick
-Some games may not be able to detect input from the D-Pad. For these games to detect the D-Pad, the Trio Linker connects the D-Pad's input with the analog stick on the hardware level. It adjusts the analog stick's axes to match what you are pressing on the D-Pad. For games that use both the analog stick and the D-Pad it may be necessary to remove the analog stick adjustment. To do that, edit the following config options in the feeder's config.ini:
+Some games may not be able to detect input from the D-Pad. For these games to detect the D-Pad, the Trio Linker connects the D-Pad's input with the left analog stick on the hardware level. It adjusts the analog stick's axes to match what you are pressing on the D-Pad. For games that use both the analog stick and the D-Pad it may be necessary to remove the analog stick adjustment. To do that, edit the following config options in the feeder's config.ini:
 
-- Link or unlink the D-Pad with the analog stick: UnlinkDpad=true or UnlinkDpad=false
-- Center X value for the analog stick: DefaultX = 50.5
-- Center Y value for the analog stick: DefaultY = 50.5
+- Unlink the D-Pad with the analog stick: UnlinkDPad=true or UnlinkDPad=false
+- Center X value for the analog stick when the D-Pad used pressed: DefaultX = 50.5
+- Center Y value for the analog stick when the D-Pad used pressed: DefaultY = 50.5
 
 ### Running the feeder
 - Make sure the vJoy device is enabled and properly configured
