@@ -34,7 +34,7 @@ struct Handle
 
 HANDLE findTrio();
 
-enum TrioController : uint16_t
+enum TrioDreamcast : uint16_t
 {
 	Start = 0x0200,
 	Up    = 0x1000,
@@ -113,7 +113,7 @@ int main(int argc, char** argv)
 
 		// The adapter outputs analog data when the d-pad is pressed,
 		// so just ignore that and center the axis.
-		if (unlinkDpad == true && buttons & TrioController::DPad)
+		if (unlinkDpad == true && buttons & TrioDreamcast::DPad)
 		{
 			SetDevAxis(hDev, 1, defaultX);
 			SetDevAxis(hDev, 2, defaultY);
@@ -125,16 +125,16 @@ int main(int argc, char** argv)
 		}
 		SetDevAxis(hDev, 4, 100.0f * (x2 / 255.0f));
 		SetDevAxis(hDev, 5, 100.0f * (y2 / 255.0f));
-		SetDevButton(hDev, 1, !!(buttons & TrioController::A));
-		SetDevButton(hDev, 2, !!(buttons & TrioController::B));
-		SetDevButton(hDev, 3, !!(buttons & TrioController::X));
-		SetDevButton(hDev, 4, !!(buttons & TrioController::Y));
-		SetDevButton(hDev, 5, !!(buttons & TrioController::LT));
-		SetDevButton(hDev, 6, !!(buttons & TrioController::RT));
-		SetDevButton(hDev, 7, !!(buttons & TrioController::Z));
-		SetDevButton(hDev, 8, !!(buttons & TrioController::Start));
+		SetDevButton(hDev, 1, !!(buttons & TrioDreamcast::A));
+		SetDevButton(hDev, 2, !!(buttons & TrioDreamcast::B));
+		SetDevButton(hDev, 3, !!(buttons & TrioDreamcast::X));
+		SetDevButton(hDev, 4, !!(buttons & TrioDreamcast::Y));
+		SetDevButton(hDev, 5, !!(buttons & TrioDreamcast::LT));
+		SetDevButton(hDev, 6, !!(buttons & TrioDreamcast::RT));
+		SetDevButton(hDev, 7, !!(buttons & TrioDreamcast::Z));
+		SetDevButton(hDev, 8, !!(buttons & TrioDreamcast::Start));
 
-		switch (buttons & TrioController::DPad)
+		switch (buttons & TrioDreamcast::DPad)
 		{
 			default:
 				SetDevPov(hDev, 1, -1.0f);
