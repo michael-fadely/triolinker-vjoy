@@ -62,6 +62,7 @@ int main(int argc, char** argv)
 	const bool hide = config.getBool("", "HideWindow", true);
 	const bool xinput = config.getBool("", "XInput", true);
 	const bool unlinkDpad = config.getBool("", "UnlinkDPad", true);
+	const bool dPadAsButtons = config.getBool("", "DPadAsButtons", false);
 	const float defaultX = config.getFloat("", "DefaultX", 50.0f);
 	const float defaultY = config.getFloat("", "DefaultY", 50.0f);
 
@@ -136,9 +137,10 @@ int main(int argc, char** argv)
 		SetDevButton(hDev, 6, !!(buttons & TrioDreamcast::RT));
 		SetDevButton(hDev, 7, !!(buttons & TrioDreamcast::Z));
 		SetDevButton(hDev, 8, !!(buttons & TrioDreamcast::Start));
-
-		switch (buttons & TrioDreamcast::DPad)
+		if (dPadAsButtons == false)
 		{
+			switch (buttons & TrioDreamcast::DPad)
+			{
 			default:
 				SetDevPov(hDev, 1, -1.0f);
 				break;
@@ -174,6 +176,14 @@ int main(int argc, char** argv)
 			case Left | Up:
 				SetDevPov(hDev, 1, 315.0f);
 				break;
+			}
+		}
+		else
+		{
+			SetDevButton(hDev, 9, !!(buttons & TrioDreamcast::Up));
+			SetDevButton(hDev, 10, !!(buttons & TrioDreamcast::Down));
+			SetDevButton(hDev, 11, !!(buttons & TrioDreamcast::Left));
+			SetDevButton(hDev, 12, !!(buttons & TrioDreamcast::Right));
 		}
 	}
 
