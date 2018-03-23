@@ -3,6 +3,7 @@
 *triolinker-vjoy* is a feeder for the vJoy driver to enable EMS Trio Linker to work on modern systems as the driver for the original Trio Linker does not support 64-bit Windows.
 
 ### Compatibility
+- Windows 7 and higher, x86 and x64
 - EMS Trio Linker model 0403 (USB VID_7701 PID_0003) only
 - Dreamcast and Gamecube controllers (PS2 controller not tested)
 - Cobalt Flux dance mat
@@ -10,9 +11,10 @@
 ### Prerequisites
 - EMS Trio Linker model 0403 with a compatible controller
 - vJoy driver http://vjoystick.sourceforge.net/site/
+- Latest version of this feeder: https://dcmods.unreliable.network/owncloud/data/PiKeyAr/files/Various/TrioLinker/feeder-latest.zip
 
 ### Configuring vJoy
-- Download and install the latest version of vJoy from the link above
+- Download and install the latest version of vJoy from the link in Prerequisites 
 - Run "Configure vJoy" from the Start Menu, tick "Enable vJoy" and add a new vJoy device
 
 Configure the device to have the following:
@@ -21,6 +23,9 @@ Configure the device to have the following:
 - POV: Continuous, 1 for Dreamcast/Gamecube controllers, 0 for a dance mat
 
 ### Configuring the feeder
+- Download the latet version of the feeder from the link in Prerequisites 
+- Extract the archive to any folder, such as C:\TrioLinker
+
 You can edit config.ini in the feeder's folder to add the following options:
 - Show or hide the debug window: HideWindow=true or HideWindow=false
 - Experimental XInput support: XInput=true or XInput=false (unlikely to work at the moment)
