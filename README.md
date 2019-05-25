@@ -1,5 +1,7 @@
 # triolinker-vjoy
 
+[![Build status](https://ci.appveyor.com/api/projects/status/hn5r40bxivy3evto?svg=true)](https://ci.appveyor.com/project/SonicFreak94/triolinker-vjoy)
+
 *triolinker-vjoy* is a feeder for the vJoy driver to enable EMS Trio Linker to work on modern systems as the driver for the original Trio Linker does not support 64-bit Windows.
 
 ### Compatibility
