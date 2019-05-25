@@ -50,20 +50,20 @@ HANDLE findTrio();
 
 enum TrioDreamcast : uint16_t
 {
+	Y     = 0x0001,
+	B     = 0x0002,
+	A     = 0x0004,
+	X     = 0x0008,
+	LT    = 0x0010,
+	RT    = 0x0020,
+	Z     = 0x0040,
+	C     = 0x0080,
 	Start = 0x0200,
 	Up    = 0x1000,
 	Right = 0x2000,
 	Down  = 0x4000,
 	Left  = 0x8000,
 	DPad  = Up | Right | Down | Left,
-	Y     = 0x0001,
-	B     = 0x0002,
-	A     = 0x0004,
-	X     = 0x0008,
-	Z     = 0x0040,
-	C     = 0x0080,
-	LT    = 0x0010,
-	RT    = 0x0020
 };
 
 int main(int argc, char** argv)
@@ -72,12 +72,12 @@ int main(int argc, char** argv)
 
 	const IniFile config("config.ini");
 
-	const  bool hide          = config.getBool("", "HideWindow", true);
-	const  bool xinput        = config.getBool("", "XInput", true);
-	const  bool unlinkDpad    = config.getBool("", "UnlinkDPad", true);
-	const  bool dPadAsButtons = config.getBool("", "DPadAsButtons", false);
-	const float defaultX      = config.getFloat("", "DefaultX", 50.0f);
-	const float defaultY      = config.getFloat("", "DefaultY", 50.0f);
+	const  bool hide          = config.getBool("",  "HideWindow",    true);
+	const  bool xinput        = config.getBool("",  "XInput",        true);
+	const  bool unlinkDpad    = config.getBool("",  "UnlinkDPad",    true);
+	const  bool dPadAsButtons = config.getBool("",  "DPadAsButtons", false);
+	const float defaultX      = config.getFloat("", "DefaultX",      50.0f);
+	const float defaultY      = config.getFloat("", "DefaultY",      50.0f);
 
 	const DevType devType = xinput ? DevType::vXbox : DevType::vJoy;
 
@@ -148,8 +148,9 @@ int main(int argc, char** argv)
 			SetDevAxis(hDev, 2, 100.0f * (static_cast<float>(y1) / 255.0f));
 		}
 
-		  SetDevAxis(hDev, 4, 100.0f * (static_cast<float>(x2) / 255.0f));
-		  SetDevAxis(hDev, 5, 100.0f * (static_cast<float>(y2) / 255.0f));
+		SetDevAxis(hDev, 4, 100.0f * (static_cast<float>(x2) / 255.0f));
+		SetDevAxis(hDev, 5, 100.0f * (static_cast<float>(y2) / 255.0f));
+
 		SetDevButton(hDev, 1, !!(buttons & TrioDreamcast::A));
 		SetDevButton(hDev, 2, !!(buttons & TrioDreamcast::B));
 		SetDevButton(hDev, 3, !!(buttons & TrioDreamcast::X));
