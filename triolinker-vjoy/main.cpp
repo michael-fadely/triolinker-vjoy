@@ -109,7 +109,13 @@ int main(int argc, char** argv)
 		return -3;
 	}
 
-	HidP_GetCaps(ptr, &caps);
+	if (!HidP_GetCaps(ptr, &caps))
+	{
+		std::cout << "HidP_GetCaps failed." << std::endl;
+		HidD_FreePreparsedData(ptr);
+		return -4;
+	}
+
 	HidD_FreePreparsedData(ptr);
 
 	if (hide)
