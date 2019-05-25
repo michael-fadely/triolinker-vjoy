@@ -60,7 +60,8 @@ enum TrioDreamcast : uint16_t
 	B     = 0x0002,
 	A     = 0x0004,
 	X     = 0x0008,
-	Z     = 0x0080,
+	Z     = 0x0040,
+	C     = 0x0080,
 	LT    = 0x0010,
 	RT    = 0x0020
 };
@@ -149,8 +150,9 @@ int main(int argc, char** argv)
 		SetDevButton(hDev, 4, !!(buttons & TrioDreamcast::Y));
 		SetDevButton(hDev, 5, !!(buttons & TrioDreamcast::LT));
 		SetDevButton(hDev, 6, !!(buttons & TrioDreamcast::RT));
-		SetDevButton(hDev, 7, !!(buttons & TrioDreamcast::Z));
+		SetDevButton(hDev, 7, !!(buttons & TrioDreamcast::C));
 		SetDevButton(hDev, 8, !!(buttons & TrioDreamcast::Start));
+		SetDevButton(hDev, 9, !!(buttons & TrioDreamcast::Z));
 
 		if (!dPadAsButtons)
 		{
@@ -195,10 +197,10 @@ int main(int argc, char** argv)
 		}
 		else
 		{
-			SetDevButton(hDev,  9, !!(buttons & TrioDreamcast::Up));
-			SetDevButton(hDev, 10, !!(buttons & TrioDreamcast::Down));
-			SetDevButton(hDev, 11, !!(buttons & TrioDreamcast::Left));
-			SetDevButton(hDev, 12, !!(buttons & TrioDreamcast::Right));
+			SetDevButton(hDev, 10, !!(buttons & TrioDreamcast::Up));
+			SetDevButton(hDev, 11, !!(buttons & TrioDreamcast::Down));
+			SetDevButton(hDev, 12, !!(buttons & TrioDreamcast::Left));
+			SetDevButton(hDev, 13, !!(buttons & TrioDreamcast::Right));
 		}
 	}
 
