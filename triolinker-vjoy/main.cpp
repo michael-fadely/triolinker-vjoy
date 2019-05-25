@@ -12,8 +12,6 @@
 
 #include "IniFile.hpp"
 
-using namespace std;
-
 struct Handle
 {
 	HANDLE handle;
@@ -22,6 +20,22 @@ struct Handle
 	{
 		this->handle = handle;
 	}
+
+	Handle(Handle&& other) noexcept
+	{
+		this->handle = other.handle;
+		other.handle = nullptr;
+	}
+
+	Handle& operator=(Handle&& other) noexcept
+	{
+		this->handle = other.handle;
+		other.handle = nullptr;
+		return *this;
+	}
+
+	Handle(const Handle& other) = delete;
+	Handle& operator=(const Handle& other) = delete;
 
 	~Handle()
 	{
@@ -51,20 +65,18 @@ enum TrioDreamcast : uint16_t
 	RT    = 0x0020
 };
 
-HANDLE findTrio();
-
 int main(int argc, char** argv)
 {
 	CopyFileA("default.ini", "config.ini", true);
 
 	const IniFile config("config.ini");
 
-	const bool hide = config.getBool("", "HideWindow", true);
-	const bool xinput = config.getBool("", "XInput", true);
-	const bool unlinkDpad = config.getBool("", "UnlinkDPad", true);
-	const bool dPadAsButtons = config.getBool("", "DPadAsButtons", false);
-	const float defaultX = config.getFloat("", "DefaultX", 50.0f);
-	const float defaultY = config.getFloat("", "DefaultY", 50.0f);
+	const  bool hide          = config.getBool("", "HideWindow", true);
+	const  bool xinput        = config.getBool("", "XInput", true);
+	const  bool unlinkDpad    = config.getBool("", "UnlinkDPad", true);
+	const  bool dPadAsButtons = config.getBool("", "DPadAsButtons", false);
+	const float defaultX      = config.getFloat("", "DefaultX", 50.0f);
+	const float defaultY      = config.getFloat("", "DefaultY", 50.0f);
 
 	const DevType devType = xinput ? DevType::vXbox : DevType::vJoy;
 
@@ -73,7 +85,7 @@ int main(int argc, char** argv)
 
 	if (r != 0)
 	{
-		cout << "USB device not found." << endl;
+		std::cout << "USB device not found." << std::endl;
 		return -1;
 	}
 
@@ -81,18 +93,18 @@ int main(int argc, char** argv)
 
 	if (trio.handle == nullptr)
 	{
-		cout << "Unable to detect Trio Linker." << endl;
+		std::cout << "Unable to detect Trio Linker." << std::endl;
 		return -2;
 	}
 
-	cout << "Trio Linker detected." << endl;
+	std::cout << "Trio Linker detected." << std::endl;
 
 	HIDP_CAPS caps {};
 	PHIDP_PREPARSED_DATA ptr = nullptr;
 
 	if (!HidD_GetPreparsedData(trio.handle, &ptr))
 	{
-		cout << "HidD_GetPreparsedData failed." << endl;
+		std::cout << "HidD_GetPreparsedData failed." << std::endl;
 		return -3;
 	}
 
@@ -105,11 +117,12 @@ int main(int argc, char** argv)
 	}
 
 	DWORD dummy;
-	vector<uint8_t> buffer(caps.InputReportByteLength);
+	std::vector<uint8_t> buffer(caps.InputReportByteLength);
 
 	while (ReadFile(trio.handle, buffer.data(), static_cast<DWORD>(buffer.size()), &dummy, nullptr))
 	{
-		const uint16_t buttons = *(uint16_t*)&buffer[1];
+		const uint16_t buttons = *reinterpret_cast<uint16_t*>(&buffer[1]);
+
 		const auto x1 = buffer[3];
 		const auto y1 = buffer[4];
 		const auto x2 = buffer[5];
@@ -117,18 +130,19 @@ int main(int argc, char** argv)
 
 		// The adapter outputs analog data when the d-pad is pressed,
 		// so just ignore that and center the axis.
-		if (unlinkDpad == true && buttons & TrioDreamcast::DPad)
+		if (unlinkDpad && buttons & TrioDreamcast::DPad)
 		{
 			SetDevAxis(hDev, 1, defaultX);
 			SetDevAxis(hDev, 2, defaultY);
 		}
 		else
 		{
-			SetDevAxis(hDev, 1, 100.0f * (x1 / 255.0f));
-			SetDevAxis(hDev, 2, 100.0f * (y1 / 255.0f));
+			SetDevAxis(hDev, 1, 100.0f * (static_cast<float>(x1) / 255.0f));
+			SetDevAxis(hDev, 2, 100.0f * (static_cast<float>(y1) / 255.0f));
 		}
-		SetDevAxis(hDev, 4, 100.0f * (x2 / 255.0f));
-		SetDevAxis(hDev, 5, 100.0f * (y2 / 255.0f));
+
+		  SetDevAxis(hDev, 4, 100.0f * (static_cast<float>(x2) / 255.0f));
+		  SetDevAxis(hDev, 5, 100.0f * (static_cast<float>(y2) / 255.0f));
 		SetDevButton(hDev, 1, !!(buttons & TrioDreamcast::A));
 		SetDevButton(hDev, 2, !!(buttons & TrioDreamcast::B));
 		SetDevButton(hDev, 3, !!(buttons & TrioDreamcast::X));
@@ -137,7 +151,8 @@ int main(int argc, char** argv)
 		SetDevButton(hDev, 6, !!(buttons & TrioDreamcast::RT));
 		SetDevButton(hDev, 7, !!(buttons & TrioDreamcast::Z));
 		SetDevButton(hDev, 8, !!(buttons & TrioDreamcast::Start));
-		if (dPadAsButtons == false)
+
+		if (!dPadAsButtons)
 		{
 			switch (buttons & TrioDreamcast::DPad)
 			{
@@ -180,7 +195,7 @@ int main(int argc, char** argv)
 		}
 		else
 		{
-			SetDevButton(hDev, 9, !!(buttons & TrioDreamcast::Up));
+			SetDevButton(hDev,  9, !!(buttons & TrioDreamcast::Up));
 			SetDevButton(hDev, 10, !!(buttons & TrioDreamcast::Down));
 			SetDevButton(hDev, 11, !!(buttons & TrioDreamcast::Left));
 			SetDevButton(hDev, 12, !!(buttons & TrioDreamcast::Right));
@@ -192,12 +207,12 @@ int main(int argc, char** argv)
 		ShowWindow(GetConsoleWindow(), SW_SHOW);
 	}
 
-	cout << "Failed to read data from device." << endl;
+	std::cout << "Failed to read data from device." << std::endl;
 	RelinquishDev(hDev);
 	return 0;
 }
 
-wstring getDevicePath(HDEVINFO handle, SP_DEVICE_INTERFACE_DATA* interface)
+std::wstring getDevicePath(HDEVINFO handle, SP_DEVICE_INTERFACE_DATA* interface)
 {
 	DWORD size = 0;
 
@@ -208,19 +223,19 @@ wstring getDevicePath(HDEVINFO handle, SP_DEVICE_INTERFACE_DATA* interface)
 		+ size
 		+ sizeof(TCHAR);
 
-	auto detail = static_cast<PSP_DEVICE_INTERFACE_DETAIL_DATA>(malloc(detail_size));
+	std::vector<uint8_t> detail_buffer(detail_size);
+	auto detail = reinterpret_cast<PSP_DEVICE_INTERFACE_DETAIL_DATA>(detail_buffer.data());
 	detail->cbSize = sizeof(SP_DEVICE_INTERFACE_DETAIL_DATA);
 
-	bool success = SetupDiGetDeviceInterfaceDetail(handle, interface, detail, size, &size, nullptr);
+	const bool success = SetupDiGetDeviceInterfaceDetail(handle, interface, detail, size, &size, nullptr);
 
-	wstring result;
+	std::wstring result;
 
 	if (success)
 	{
-		result = wstring(detail->DevicePath);
+		result = std::wstring(detail->DevicePath);
 	}
 
-	free(detail);
 	return result;
 }
 
@@ -244,10 +259,9 @@ HANDLE findTrio()
 		SP_DEVICE_INTERFACE_DATA interfaceData {};
 		interfaceData.cbSize = sizeof(SP_DEVICE_INTERFACE_DATA);
 
-		for (size_t j = 0; SetupDiEnumDeviceInterfaces(devInfoSet, &info, &guid,
-			static_cast<DWORD>(j), &interfaceData); j++)
+		for (size_t j = 0; SetupDiEnumDeviceInterfaces(devInfoSet, &info, &guid, static_cast<DWORD>(j), &interfaceData); j++)
 		{
-			wstring path(getDevicePath(devInfoSet, &interfaceData));
+			std::wstring path(getDevicePath(devInfoSet, &interfaceData));
 
 			const auto handle = CreateFile(path.c_str(), GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE,
 			                               nullptr, OPEN_EXISTING, 0, nullptr);
@@ -257,7 +271,6 @@ HANDLE findTrio()
 				continue;
 			}
 
-			// ReSharper disable once CppInitializedValueIsAlwaysRewritten
 			Handle guard(handle);
 
 			HIDD_ATTRIBUTES attributes {};
@@ -266,7 +279,10 @@ HANDLE findTrio()
 				continue;
 			}
 
-			if (attributes.VendorID != 0x7701 || attributes.ProductID != 0x0003)
+			constexpr auto vendorID = 0x7701;
+			constexpr auto productID = 0x0003;
+
+			if (attributes.VendorID != vendorID || attributes.ProductID != productID)
 			{
 				continue;
 			}
