@@ -165,41 +165,41 @@ int main(int argc, char** argv)
 		{
 			switch (buttons & TrioDreamcast::DPad)
 			{
-			default:
-				SetDevPov(hDev, 1, -1.0f);
-				break;
+				default:
+					SetDevPov(hDev, 1, -1.0f);
+					break;
 
-			case Up:
-				SetDevPov(hDev, 1, 0.0f);
-				break;
+				case Up:
+					SetDevPov(hDev, 1, 0.0f);
+					break;
 
-			case Up | Right:
-				SetDevPov(hDev, 1, 45.0f);
-				break;
+				case Up | Right:
+					SetDevPov(hDev, 1, 45.0f);
+					break;
 
-			case Right:
-				SetDevPov(hDev, 1, 90.0f);
-				break;
+				case Right:
+					SetDevPov(hDev, 1, 90.0f);
+					break;
 
-			case Right | Down:
-				SetDevPov(hDev, 1, 135.0f);
-				break;
+				case Right | Down:
+					SetDevPov(hDev, 1, 135.0f);
+					break;
 
-			case Down:
-				SetDevPov(hDev, 1, 180.0f);
-				break;
+				case Down:
+					SetDevPov(hDev, 1, 180.0f);
+					break;
 
-			case Down | Left:
-				SetDevPov(hDev, 1, 225.0f);
-				break;
+				case Down | Left:
+					SetDevPov(hDev, 1, 225.0f);
+					break;
 
-			case Left:
-				SetDevPov(hDev, 1, 270.0f);
-				break;
+				case Left:
+					SetDevPov(hDev, 1, 270.0f);
+					break;
 
-			case Left | Up:
-				SetDevPov(hDev, 1, 315.0f);
-				break;
+				case Left | Up:
+					SetDevPov(hDev, 1, 315.0f);
+					break;
 			}
 		}
 		else
@@ -288,7 +288,7 @@ HANDLE findTrio()
 				continue;
 			}
 
-			constexpr auto vendorID = 0x7701;
+			constexpr auto vendorID  = 0x7701;
 			constexpr auto productID = 0x0003;
 
 			if (attributes.VendorID != vendorID || attributes.ProductID != productID)
