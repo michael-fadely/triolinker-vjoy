@@ -48,22 +48,27 @@ struct Handle
 
 HANDLE findTrio();
 
+// TODO: test with controller that has D button
+// TODO: split buttons into separate enums; Select is for PS2
 enum TrioDreamcast : uint16_t
 {
-	Y     = 0x0001,
-	B     = 0x0002,
-	A     = 0x0004,
-	X     = 0x0008,
-	LT    = 0x0010,
-	RT    = 0x0020,
-	Z     = 0x0040,
-	C     = 0x0080,
-	Start = 0x0200,
-	Up    = 0x1000,
-	Right = 0x2000,
-	Down  = 0x4000,
-	Left  = 0x8000,
-	DPad  = Up | Right | Down | Left,
+	Y      = 0x0001,
+	B      = 0x0002,
+	A      = 0x0004,
+	X      = 0x0008,
+	LT     = 0x0010,
+	RT     = 0x0020,
+	Z      = 0x0040,
+	C      = 0x0080,
+	Select = 0x0100,
+	Start  = 0x0200,
+	Bit10  = 0x0400,
+	Bit11  = 0x0800,
+	Up     = 0x1000,
+	Right  = 0x2000,
+	Down   = 0x4000,
+	Left   = 0x8000,
+	DPad   = Up | Right | Down | Left,
 };
 
 int main(int argc, char** argv)
@@ -161,6 +166,10 @@ int main(int argc, char** argv)
 		SetDevButton(hDev, 8, !!(buttons & TrioDreamcast::Start));
 		SetDevButton(hDev, 9, !!(buttons & TrioDreamcast::Z));
 
+		SetDevButton(hDev, 10, !!(buttons & TrioDreamcast::Select));
+		SetDevButton(hDev, 11, !!(buttons & TrioDreamcast::Bit10));
+		SetDevButton(hDev, 12, !!(buttons & TrioDreamcast::Bit11));
+
 		if (!dPadAsButtons)
 		{
 			switch (buttons & TrioDreamcast::DPad)
@@ -204,10 +213,10 @@ int main(int argc, char** argv)
 		}
 		else
 		{
-			SetDevButton(hDev, 10, !!(buttons & TrioDreamcast::Up));
-			SetDevButton(hDev, 11, !!(buttons & TrioDreamcast::Down));
-			SetDevButton(hDev, 12, !!(buttons & TrioDreamcast::Left));
-			SetDevButton(hDev, 13, !!(buttons & TrioDreamcast::Right));
+			SetDevButton(hDev, 13, !!(buttons & TrioDreamcast::Up));
+			SetDevButton(hDev, 14, !!(buttons & TrioDreamcast::Down));
+			SetDevButton(hDev, 15, !!(buttons & TrioDreamcast::Left));
+			SetDevButton(hDev, 16, !!(buttons & TrioDreamcast::Right));
 		}
 	}
 
