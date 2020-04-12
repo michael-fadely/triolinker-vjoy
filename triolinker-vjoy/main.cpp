@@ -48,22 +48,27 @@ struct Handle
 
 HANDLE findTrio();
 
+// TODO: test with controller that has D button
+// TODO: split buttons into separate enums; Select is for PS2
 enum TrioDreamcast : uint16_t
 {
-	Start = 0x0200,
-	Up    = 0x1000,
-	Right = 0x2000,
-	Down  = 0x4000,
-	Left  = 0x8000,
-	DPad  = Up | Right | Down | Left,
-	Y     = 0x0001,
-	B     = 0x0002,
-	A     = 0x0004,
-	X     = 0x0008,
-	Z     = 0x0040,
-	C     = 0x0080,
-	LT    = 0x0010,
-	RT    = 0x0020
+	Y      = 0x0001,
+	B      = 0x0002,
+	A      = 0x0004,
+	X      = 0x0008,
+	LT     = 0x0010,
+	RT     = 0x0020,
+	Z      = 0x0040,
+	C      = 0x0080,
+	Select = 0x0100,
+	Start  = 0x0200,
+	Bit10  = 0x0400,
+	Bit11  = 0x0800,
+	Up     = 0x1000,
+	Right  = 0x2000,
+	Down   = 0x4000,
+	Left   = 0x8000,
+	DPad   = Up | Right | Down | Left,
 };
 
 int main(int argc, char** argv)
@@ -72,12 +77,12 @@ int main(int argc, char** argv)
 
 	const IniFile config("config.ini");
 
-	const  bool hide          = config.getBool("", "HideWindow", true);
-	const  bool xinput        = config.getBool("", "XInput", true);
-	const  bool unlinkDpad    = config.getBool("", "UnlinkDPad", true);
-	const  bool dPadAsButtons = config.getBool("", "DPadAsButtons", false);
-	const float defaultX      = config.getFloat("", "DefaultX", 50.0f);
-	const float defaultY      = config.getFloat("", "DefaultY", 50.0f);
+	const  bool hide          = config.getBool("",  "HideWindow",    true);
+	const  bool xinput        = config.getBool("",  "XInput",        true);
+	const  bool unlinkDpad    = config.getBool("",  "UnlinkDPad",    true);
+	const  bool dPadAsButtons = config.getBool("",  "DPadAsButtons", false);
+	const float defaultX      = config.getFloat("", "DefaultX",      50.0f);
+	const float defaultY      = config.getFloat("", "DefaultY",      50.0f);
 
 	const DevType devType = xinput ? DevType::vXbox : DevType::vJoy;
 
@@ -109,7 +114,13 @@ int main(int argc, char** argv)
 		return -3;
 	}
 
-	HidP_GetCaps(ptr, &caps);
+	if (!HidP_GetCaps(ptr, &caps))
+	{
+		std::cout << "HidP_GetCaps failed." << std::endl;
+		HidD_FreePreparsedData(ptr);
+		return -4;
+	}
+
 	HidD_FreePreparsedData(ptr);
 
 	if (hide)
@@ -142,8 +153,9 @@ int main(int argc, char** argv)
 			SetDevAxis(hDev, 2, 100.0f * (static_cast<float>(y1) / 255.0f));
 		}
 
-		  SetDevAxis(hDev, 4, 100.0f * (static_cast<float>(x2) / 255.0f));
-		  SetDevAxis(hDev, 5, 100.0f * (static_cast<float>(y2) / 255.0f));
+		SetDevAxis(hDev, 4, 100.0f * (static_cast<float>(x2) / 255.0f));
+		SetDevAxis(hDev, 5, 100.0f * (static_cast<float>(y2) / 255.0f));
+
 		SetDevButton(hDev, 1, !!(buttons & TrioDreamcast::A));
 		SetDevButton(hDev, 2, !!(buttons & TrioDreamcast::B));
 		SetDevButton(hDev, 3, !!(buttons & TrioDreamcast::X));
@@ -154,53 +166,57 @@ int main(int argc, char** argv)
 		SetDevButton(hDev, 8, !!(buttons & TrioDreamcast::Start));
 		SetDevButton(hDev, 9, !!(buttons & TrioDreamcast::Z));
 
+		SetDevButton(hDev, 10, !!(buttons & TrioDreamcast::Select));
+		SetDevButton(hDev, 11, !!(buttons & TrioDreamcast::Bit10));
+		SetDevButton(hDev, 12, !!(buttons & TrioDreamcast::Bit11));
+
 		if (!dPadAsButtons)
 		{
 			switch (buttons & TrioDreamcast::DPad)
 			{
-			default:
-				SetDevPov(hDev, 1, -1.0f);
-				break;
+				default:
+					SetDevPov(hDev, 1, -1.0f);
+					break;
 
-			case Up:
-				SetDevPov(hDev, 1, 0.0f);
-				break;
+				case Up:
+					SetDevPov(hDev, 1, 0.0f);
+					break;
 
-			case Up | Right:
-				SetDevPov(hDev, 1, 45.0f);
-				break;
+				case Up | Right:
+					SetDevPov(hDev, 1, 45.0f);
+					break;
 
-			case Right:
-				SetDevPov(hDev, 1, 90.0f);
-				break;
+				case Right:
+					SetDevPov(hDev, 1, 90.0f);
+					break;
 
-			case Right | Down:
-				SetDevPov(hDev, 1, 135.0f);
-				break;
+				case Right | Down:
+					SetDevPov(hDev, 1, 135.0f);
+					break;
 
-			case Down:
-				SetDevPov(hDev, 1, 180.0f);
-				break;
+				case Down:
+					SetDevPov(hDev, 1, 180.0f);
+					break;
 
-			case Down | Left:
-				SetDevPov(hDev, 1, 225.0f);
-				break;
+				case Down | Left:
+					SetDevPov(hDev, 1, 225.0f);
+					break;
 
-			case Left:
-				SetDevPov(hDev, 1, 270.0f);
-				break;
+				case Left:
+					SetDevPov(hDev, 1, 270.0f);
+					break;
 
-			case Left | Up:
-				SetDevPov(hDev, 1, 315.0f);
-				break;
+				case Left | Up:
+					SetDevPov(hDev, 1, 315.0f);
+					break;
 			}
 		}
 		else
 		{
-			SetDevButton(hDev, 10, !!(buttons & TrioDreamcast::Up));
-			SetDevButton(hDev, 11, !!(buttons & TrioDreamcast::Down));
-			SetDevButton(hDev, 12, !!(buttons & TrioDreamcast::Left));
-			SetDevButton(hDev, 13, !!(buttons & TrioDreamcast::Right));
+			SetDevButton(hDev, 13, !!(buttons & TrioDreamcast::Up));
+			SetDevButton(hDev, 14, !!(buttons & TrioDreamcast::Down));
+			SetDevButton(hDev, 15, !!(buttons & TrioDreamcast::Left));
+			SetDevButton(hDev, 16, !!(buttons & TrioDreamcast::Right));
 		}
 	}
 
@@ -281,7 +297,7 @@ HANDLE findTrio()
 				continue;
 			}
 
-			constexpr auto vendorID = 0x7701;
+			constexpr auto vendorID  = 0x7701;
 			constexpr auto productID = 0x0003;
 
 			if (attributes.VendorID != vendorID || attributes.ProductID != productID)
