@@ -89,7 +89,7 @@ Usage: `hid-tester.exe --vendor-id XXXX --product-id YYYY`, where `XXXX` and `YY
 
 If the program detects your controller, you will see a list of two-digit values at the bottom. Each of those values corresponds to a raw input buffer. The first value is buffer 0, the second is buffer 1 etc. Move analog sticks and press buttons on your controller and take note which buffers react to them. For example, if the third value becomes `FF` when you move the analog stick down, it means the Y axis should be mapped to buffer 2. If your controller has more than 8 buttons it may use two input buffers for them, in which case you can use both `Buttons1` and `Buttons2` settings in `config.ini`. The D-Pad/POV may share a buffer with other buttons. To map the D-Pad properly, check each of the values corresponding to each direction of the D-Pad, including neutral/centered. Make the necessary changes in `config.ini` and restart the feeder.
 
-Here is a sample `config.ini` mapped to a generic no-brand USB controller. This controller's analog stick uses buffers 1 and 2, the second analog stick (RX/RY in vJoy) uses buffers 4 and 5, the buttons use buffers 6 and 7, and the D-Pad shares the 6th buffer with half of the buttons. The D-Pad's neutral/centered value is `0F`.'
+Here is a sample `config.ini` mapped to a generic no-brand USB controller. This controller's analog stick uses buffers 1 and 2, the second analog stick (RX/RY in vJoy) uses buffers 4 and 5, the buttons use buffers 6 and 7, and the D-Pad shares the 6th buffer with half of the buttons. The D-Pad's neutral/centered value is `0F`.
 
 ```ini
 [General]
