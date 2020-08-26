@@ -2,7 +2,7 @@
 
 [![Build status](https://ci.appveyor.com/api/projects/status/hn5r40bxivy3evto?svg=true)](https://ci.appveyor.com/project/SonicFreak94/triolinker-vjoy)
 
-*triolinker-vjoy* is a feeder for the vJoy driver to enable any HID compliant device without proper drivers to work on modern systems. The original purpose of this program was to enable EMS Trio Linker to work on x64 versions of Windows.
+*triolinker-vjoy* is a feeder for the vJoy driver to enable any HID compliant device without proper drivers to work on modern systems. The original purpose of this program was to enable EMS Trio Linker to work on x64 versions of Windows. It has since expanded to become a generic feeder for any USB HID device.
 
 ### Prerequisites
 - Any HID-compatible device, such as EMS Trio Linker/Trio Linker Plus with a Dreamcast controller
