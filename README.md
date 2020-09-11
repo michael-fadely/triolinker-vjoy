@@ -2,16 +2,10 @@
 
 [![Build status](https://ci.appveyor.com/api/projects/status/hn5r40bxivy3evto?svg=true)](https://ci.appveyor.com/project/SonicFreak94/triolinker-vjoy)
 
-*triolinker-vjoy* is a feeder for the vJoy driver to enable EMS Trio Linker to work on modern systems as the driver for the original Trio Linker does not support 64-bit Windows.
-
-### Compatibility
-- Windows 7 and higher, x86 and x64
-- EMS Trio Linker model 0403 (USB VID_7701 PID_0003) only
-- Dreamcast and Gamecube controllers (PS2 controller not tested)
-- Cobalt Flux dance mat
+*triolinker-vjoy* is a feeder for the vJoy driver to enable any HID compliant device without proper drivers to work on modern systems. The original purpose of this program was to enable EMS Trio Linker to work on x64 versions of Windows. It has since expanded to become a generic feeder for any USB HID device.
 
 ### Prerequisites
-- EMS Trio Linker model 0403 with a compatible controller
+- Any HID-compatible device, such as EMS Trio Linker/Trio Linker Plus with a Dreamcast controller
 - vJoy driver http://vjoystick.sourceforge.net/site/
 - Latest version of this feeder: https://dcmods.unreliable.network/owncloud/data/PiKeyAr/files/Various/TrioLinker/feeder-latest.zip
 
@@ -20,39 +14,110 @@
 - Run "Configure vJoy" from the Start Menu, tick "Enable vJoy" and add a new vJoy device
 
 Configure the device to have the following:
-- Axes: X and Y only for the Dreamcast controller; X, Y, Rx and Ry for the Gamecube controller
+- Axes: X and Y only for Trio Linker (Dreamcast); X, Y, Rx and Ry for for Trio Linker (Gamecube)
 - Buttons: 8 buttons for Dreamcast/Gamecube controllers, 12 buttons for a dance mat
 - POV: Continuous, 1 for Dreamcast/Gamecube controllers, 0 for a dance mat
 
-### Configuring the feeder
-- Download the latet version of the feeder from the link in Prerequisites 
+### Installing the feeder
+- Download the latest version of the feeder from the link in Prerequisites 
 - Extract the archive to any folder, such as C:\TrioLinker
-
-You can edit config.ini in the feeder's folder to add the following options:
-- Show or hide the debug window: HideWindow=true or HideWindow=false
-- Experimental XInput support: XInput=true or XInput=false (unlikely to work at the moment)
-
-### Using the D-Pad as individual buttons
-If you need to be able to press Up+Down or Left+Right simultaneously (for example, with a dance mat), you need to disable D-Pad emulation and map Up/Down/Left/Right to individual buttons.
-- Enable mapping of D-Pad directions to buttons in config.ini: DPadAsButtons=true
-- Make sure your vJoy device has 12 buttons and 0 POVs
-- Run the feeder and use buttons 9 (Up), 10 (Down), 11 (Left) and 12 (Right) to set up the game(s).
-
-### Linking and unlinking the D-Pad with the analog stick
-When using a Dreamcast controller, the Trio Linker synchronizes its analog stick's axes with the D-Pad. For games that use both the analog stick and the D-Pad it may be necessary to remove the analog stick adjustment. To do that, edit the following config options in the feeder's config.ini:
-- Unlink the D-Pad with the analog stick: UnlinkDPad=true or UnlinkDPad=false
-- Center X value for the analog stick when the D-Pad is pressed: DefaultX = 50.5
-- Center Y value for the analog stick when the D-Pad is pressed: DefaultY = 50.5
-
-The above settings are only useful for a Dreamcast controller. If you have a Gamecube controller, keep the "UnlinkDPad" option disabled, which will let you use both the D-Pad and the analog stick simultaneously.
-
-Unfortunately with the Dreamcast controller it is not possible to use both the D-Pad and the analog stick at the same time. This is a hardware limitation. The original driver for the Trio Linker has an option to disable the analog stick adjustment when the D-Pad is pressed, but enabling that option does not allow for simultaneous use of the analog stick with the D-Pad - it only centers the analog stick's axes whenever the D-Pad is used, which is equivalent to the "UnlinkDPad" setting in this feeder.
+- Edit `config.ini` in the feeder's folder for additional configuration
 
 ### Running the feeder
 - Make sure the vJoy device is enabled and properly configured
 - Plug in the Trio Linker
 - Run triolinker-vjoy.exe
-- If you unplug the Trio Linker at any point, the program will terminate. Rerun triolinker-vjoy.exe after plugging it back in.
+- If you unplug the device at any point, the program will terminate. Rerun triolinker-vjoy.exe after plugging it back in.
 
 ### Testing the controller ###
 You can check whether the controller is working properly by running the Game Controllers applet from the Control Panel (joy.cpl), or by using vJoy's monitoring program ("Monitor vJoy" in the Start Menu).
+
+### Advanced configuration ###
+
+#### `[General]` section in `config.ini`
+
+Use this section to configure general settings for the feeder.
+##### 
+| Field                    | Type        | Range        | Default     | Description |
+| ------------------------ | ----------- | ------------ | -----------:| ----------- |
+| `HideWindow`             | boolean     |     `0`, `1` |         `0` | Hide console output when the feeder is running. |
+| `UnlinkDPad`             | boolean     |     `0`, `1` |         `1` | Center X and Y analog axes whenever the D-Pad is pressed. |
+| `DefaultX`               | float       |   `0`, `255` |      `50.1` | Set analog X to this value whenever the D-Pad is pressed. |
+| `DefaultY`               | float       |   `0`, `255` |      `50.1` | Set analog Y to this value whenever the D-Pad is pressed. |
+| `DPadAsButtons`          | boolean     |     `0`, `1` |         `0` | Treat the D-Pad as individual buttons instead of a POV. |
+| `VendorID`               | string      |`0000`, `FFFF`|      `7701` | USB device VID to be passed to vJoy. |
+| `ProductID`              | string      |`0000`, `FFFF`|      `0003` | USB device PID to be passed to vJoy. |
+
+#### `[Buffers]` section in `config.ini`
+
+This section allows to configure the device's raw input buffers as analog axes, buttons or the D-Pad.
+
+| Field                    | Type        | Range        | Default     | Description |
+| ------------------------ | ----------- | ------------ | -----------:| ----------- |
+| `X`         		   | integer     |     `0`, `8` |         `3` | Raw input buffer to assign to the X axis. |
+| `Y`              	   | integer     |     `0`, `8` |         `4` | Raw input buffer to assign to the Y axis. |
+| `Z`		           | integer     |     `0`, `8` |         `0` | Raw input buffer to assign to the Z axis. |
+| `RX`              	   | integer     |     `0`, `8` |         `0` | Raw input buffer to assign to the RX axis. |
+| `RY`       		   | integer     |     `0`, `8` |         `0` | Raw input buffer to assign to the RY axis. |
+| `RZ`          	   | integer     |     `0`, `8` |         `0` | Raw input buffer to assign to the RZ axis. |
+| `Buttons1`               | integer     |     `0`, `8` |         `1` | Raw input buffer to assign to buttons. |
+| `Buttons2`               | integer     |     `0`, `8` |         `2` | Raw input buffer to assign to buttons. |
+| `DPad`                   | integer     |     `0`, `8` |         `2` | Raw input buffer to assign to the D-Pad.|
+
+#### `[DPad]` section in `config.ini`
+
+This section allows to configure exact raw input values for each direction of the D-Pad.
+
+| Field                    | Type        | Range        | Default     | Description |
+| ------------------------ | ----------- | ------------ | -----------:| ----------- |
+| `DPad North`             | string      |    `0`, `FF` |        `10` | Raw input value for D-Pad North (0 degrees). |
+| `DPad NorthEast`         | string      |    `0`, `FF` |        `30` | Raw input value for D-Pad North-East (45 degrees). |
+| `DPad East`              | string      |    `0`, `FF` |        `20` | Raw input value for D-Pad East (90 degrees). |
+| `DPad SouthEast`         | string      |    `0`, `FF` |        `60` | Raw input value for D-Pad South-East (135 degrees). |
+| `DPad South`             | string      |    `0`, `FF` |        `40` | Raw input value for D-Pad South (180 degrees). |
+| `DPad SouthWest`         | string      |    `0`, `FF` |        `C0` | Raw input value for D-Pad South-West (225 degrees). |
+| `DPad West`              | string      |    `0`, `FF` |        `80` | Raw input value for D-Pad West (270 degrees). |
+| `DPad NorthWest`         | string      |    `0`, `FF` |        `90` | Raw input value for D-Pad North-West (315 degrees). |
+| `DPad Center`            | string      |    `0`, `FF` |        `00` | Raw input value for D-Pad Center. |
+
+### Identifying correct input buffers and values for your device ###
+
+By default, this feeder is configured for EMS Trio Linker with a Dreamcast controller. For the feeder to work correctly with other devices you need to identify which raw input buffers on your device correspond to axes, buttons and the D-Pad/POV. Use the [HID tester utility](https://dcmods.unreliable.network/owncloud/data/PiKeyAr/files/Various/TrioLinker/hid-tester.exe) to find out which inputs are associated with raw input buffers on your device.
+
+
+Usage: `hid-tester.exe --vendor-id XXXX --product-id YYYY`, where `XXXX` and `YYYY` are your device hardware IDs (VID and PID).
+
+If the program detects your controller, you will see a list of two-digit values at the bottom. Each of those values corresponds to a raw input buffer. The first value is buffer 0, the second is buffer 1 etc. Move analog sticks and press buttons on your controller and take note which buffers react to them. For example, if the third value becomes `FF` when you move the analog stick down, it means the Y axis should be mapped to buffer 2. If your controller has more than 8 buttons it may use two input buffers for them, in which case you can use both `Buttons1` and `Buttons2` settings in `config.ini`. The D-Pad/POV may share a buffer with other buttons. To map the D-Pad properly, check each of the values corresponding to each direction of the D-Pad, including neutral/centered. Make the necessary changes in `config.ini` and restart the feeder.
+
+Here is a sample `config.ini` mapped to a generic no-brand USB controller. This controller's analog stick uses buffers 1 and 2, the second analog stick (RX/RY in vJoy) uses buffers 4 and 5, the buttons use buffers 6 and 7, and the D-Pad shares the 6th buffer with half of the buttons. The D-Pad's neutral/centered value is `0F`.
+
+```ini
+[General]
+HideWindow=false
+UnlinkDPad=false
+DPadAsButtons=false
+DefaultX=50.5
+DefaultY=50.5
+VendorID=0079
+ProductID=0006
+
+[Buffers]
+X=1
+Y=2
+RX=4
+RY=5
+Buttons1=6
+Buttons2=7
+DPad=6
+
+[DPad]
+DPad North=0
+DPad South=4
+DPad West=6
+DPad East=2
+DPad NorthWest=7
+DPad SouthWest=5
+DPad NorthEast=1
+DPad SouthEast=3
+DPad Center=F
+```

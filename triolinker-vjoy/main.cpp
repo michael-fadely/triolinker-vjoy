@@ -12,6 +12,28 @@
 
 #include "IniFile.hpp"
 
+static int vendorID = 0x7701;
+static int productID = 0x0003;
+static int buffer_x = 3;
+static int buffer_y = 4;
+static int buffer_z = 0;
+static int buffer_rx = 0;
+static int buffer_ry = 0;
+static int buffer_rz = 0;
+static int buffer_buttons1 = 1;
+static int buffer_buttons2 = 2;
+static int buffer_hat = 2;
+static uint8_t hat_up = 0x10;
+static uint8_t hat_up_right = 0x30;
+static uint8_t hat_up_left = 0x90;
+static uint8_t hat_down = 0x40;
+static uint8_t hat_down_right = 0x60;
+static uint8_t hat_down_left = 0xC0;
+static uint8_t hat_left = 0x80;
+static uint8_t hat_right = 0x20;
+static uint8_t hat_center = 0;
+static bool dPadAsButtons = false;
+
 struct Handle
 {
 	HANDLE handle;
@@ -48,28 +70,26 @@ struct Handle
 
 HANDLE findTrio();
 
-// TODO: test with controller that has D button
-// TODO: split buttons into separate enums; Select is for PS2
-enum TrioDreamcast : uint16_t
+enum ButtonBits : uint8_t
 {
-	Y      = 0x0001,
-	B      = 0x0002,
-	A      = 0x0004,
-	X      = 0x0008,
-	LT     = 0x0010,
-	RT     = 0x0020,
-	Z      = 0x0040,
-	C      = 0x0080,
-	Select = 0x0100,
-	Start  = 0x0200,
-	Bit10  = 0x0400,
-	Bit11  = 0x0800,
-	Up     = 0x1000,
-	Right  = 0x2000,
-	Down   = 0x4000,
-	Left   = 0x8000,
-	DPad   = Up | Right | Down | Left,
+	Button0 = 0x01,
+	Button1 = 0x02,
+	Button2 = 0x04,
+	Button3 = 0x08,
+	Button4 = 0x10,
+	Button5 = 0x20,
+	Button6 = 0x40,
+	Button7 = 0x80,
 };
+
+bool CheckIfButtonIsPad(int buffer, uint8_t button)
+{
+	if (buffer == buffer_hat && !dPadAsButtons)
+	{
+		if (hat_center & button || button == hat_up || button == hat_up_right || button == hat_right || button == hat_down_right || button == hat_down || button == hat_down_left || button == hat_left || button == hat_up_left || button == hat_center) return true;
+	}
+	return false;
+}
 
 int main(int argc, char** argv)
 {
@@ -77,14 +97,33 @@ int main(int argc, char** argv)
 
 	const IniFile config("config.ini");
 
-	const  bool hide          = config.getBool("",  "HideWindow",    true);
-	const  bool xinput        = config.getBool("",  "XInput",        true);
-	const  bool unlinkDpad    = config.getBool("",  "UnlinkDPad",    true);
-	const  bool dPadAsButtons = config.getBool("",  "DPadAsButtons", false);
-	const float defaultX      = config.getFloat("", "DefaultX",      50.0f);
-	const float defaultY      = config.getFloat("", "DefaultY",      50.0f);
+	const  bool hide          = config.getBool("General",  "HideWindow",    false);
+	const  bool unlinkDpad    = config.getBool("General",  "UnlinkDPad",    true);
+	const float defaultX      = config.getFloat("General", "DefaultX",      50.1f);
+	const float defaultY      = config.getFloat("General", "DefaultY",      50.1f);
+	dPadAsButtons = config.getBool("General", "DPadAsButtons", false);
+	vendorID = std::stol(config.getString("General", "VendorID", "7701"), nullptr, 16);
+	productID = std::stol(config.getString("General", "ProductID", "0003"), nullptr, 16);
+	buffer_x = config.getInt("Buffers", "X", 3);
+	buffer_y = config.getInt("Buffers", "Y", 4);
+	buffer_z = config.getInt("Buffers", "Z", 0);
+	buffer_rx = config.getInt("Buffers", "RX", 0);
+	buffer_ry = config.getInt("Buffers", "RY", 0);
+	buffer_rz = config.getInt("Buffers", "RZ", 0);
+	buffer_buttons1 = config.getInt("Buffers", "Buttons1", 1);
+	buffer_buttons2 = config.getInt("Buffers", "Buttons2", 2);
+	buffer_hat = config.getInt("Buffers", "DPad", 2);
+	hat_up = std::stol(config.getString("DPad", "DPad North", "0x10"), nullptr, 16);
+	hat_down = std::stol(config.getString("DPad", "DPad South", "0x40"), nullptr, 16);
+	hat_left = std::stol(config.getString("DPad", "DPad West", "0x80"), nullptr, 16);
+	hat_right = std::stol(config.getString("DPad", "DPad East", "0x20"), nullptr, 16);
+	hat_up_left = std::stol(config.getString("DPad", "DPad NorthWest", "0x90"), nullptr, 16);
+	hat_up_right = std::stol(config.getString("DPad", "DPad NorthEast", "0x30"), nullptr, 16);
+	hat_down_left = std::stol(config.getString("DPad", "DPad SouthWest", "0xC0"), nullptr, 16);
+	hat_down_right = std::stol(config.getString("DPad", "DPad SouthEast", "0x60"), nullptr, 16);
+	hat_center = std::stol(config.getString("DPad", "DPad Center", "0"), nullptr, 16);
 
-	const DevType devType = xinput ? DevType::vXbox : DevType::vJoy;
+	const DevType devType = DevType::vJoy;
 
 	HDEVICE hDev;
 	const auto r = AcquireDev(1, devType, &hDev);
@@ -99,11 +138,11 @@ int main(int argc, char** argv)
 
 	if (trio.handle == nullptr)
 	{
-		std::cout << "Unable to detect Trio Linker." << std::endl;
+		std::cout << "Unable to detect device: vendor ID " << std::hex << vendorID << " product ID " << std::hex << productID << "." << std::endl;
 		return -2;
 	}
 
-	std::cout << "Trio Linker detected." << std::endl;
+	std::cout << "Device found: vendor ID " << std::hex << vendorID << " product ID " << std::hex << productID << "." << std::endl;
 
 	HIDP_CAPS caps {};
 	PHIDP_PREPARSED_DATA ptr = nullptr;
@@ -133,91 +172,65 @@ int main(int argc, char** argv)
 
 	while (ReadFile(trio.handle, buffer.data(), static_cast<DWORD>(buffer.size()), &dummy, nullptr))
 	{
-		const uint16_t buttons = *reinterpret_cast<uint16_t*>(&buffer[1]);
+		const uint8_t buttons1 = *reinterpret_cast<uint8_t*>(&buffer[buffer_buttons1]);
+		const uint8_t buttons2 = *reinterpret_cast<uint8_t*>(&buffer[buffer_buttons2]);
+		const uint8_t hat	   = *reinterpret_cast<uint8_t*>(&buffer[buffer_hat]);
 
-		const auto x1 = buffer[3];
-		const auto y1 = buffer[4];
-		const auto x2 = buffer[5];
-		const auto y2 = buffer[6];
-
-		// The adapter outputs analog data when the d-pad is pressed,
-		// so just ignore that and center the axis.
-		if (unlinkDpad && buttons & TrioDreamcast::DPad)
+		const auto x = buffer[buffer_x];
+		const auto y = buffer[buffer_y];
+		const auto z = buffer[buffer_z];
+		const auto rx = buffer[buffer_rx];
+		const auto ry = buffer[buffer_ry];
+		const auto rz = buffer[buffer_rz];
+		if (unlinkDpad && hat != hat_center)
 		{
 			SetDevAxis(hDev, 1, defaultX);
 			SetDevAxis(hDev, 2, defaultY);
 		}
 		else
 		{
-			SetDevAxis(hDev, 1, 100.0f * (static_cast<float>(x1) / 255.0f));
-			SetDevAxis(hDev, 2, 100.0f * (static_cast<float>(y1) / 255.0f));
+			SetDevAxis(hDev, 1, 100.0f * (static_cast<float>(x) / 255.0f));
+			SetDevAxis(hDev, 2, 100.0f * (static_cast<float>(y) / 255.0f));
 		}
+		SetDevAxis(hDev, 3, 100.0f * (static_cast<float>(z) / 255.0f));
+		SetDevAxis(hDev, 4, 100.0f * (static_cast<float>(rx) / 255.0f));
+		SetDevAxis(hDev, 5, 100.0f * (static_cast<float>(ry) / 255.0f));
+		SetDevAxis(hDev, 6, 100.0f * (static_cast<float>(rz) / 255.0f));
 
-		SetDevAxis(hDev, 4, 100.0f * (static_cast<float>(x2) / 255.0f));
-		SetDevAxis(hDev, 5, 100.0f * (static_cast<float>(y2) / 255.0f));
+		if (!CheckIfButtonIsPad(buffer_buttons1, Button0)) SetDevButton(hDev, 1, !!(buttons1 & Button0)); else SetDevButton(hDev, 1, 0);
+		if (!CheckIfButtonIsPad(buffer_buttons1, Button1)) SetDevButton(hDev, 2, !!(buttons1 & Button1)); else SetDevButton(hDev, 2, 0);
+		if (!CheckIfButtonIsPad(buffer_buttons1, Button2)) SetDevButton(hDev, 3, !!(buttons1 & Button2)); else SetDevButton(hDev, 3, 0);
+		if (!CheckIfButtonIsPad(buffer_buttons1, Button3)) SetDevButton(hDev, 4, !!(buttons1 & Button3)); else SetDevButton(hDev, 4, 0);
+		
+		if (!CheckIfButtonIsPad(buffer_buttons1, Button4)) SetDevButton(hDev, 5, !!(buttons1 & Button4)); else SetDevButton(hDev, 5, 0);
+		if (!CheckIfButtonIsPad(buffer_buttons1, Button5)) SetDevButton(hDev, 6, !!(buttons1 & Button5)); else SetDevButton(hDev, 6, 0);
+		if (!CheckIfButtonIsPad(buffer_buttons1, Button6)) SetDevButton(hDev, 7, !!(buttons1 & Button6)); else SetDevButton(hDev, 7, 0);
+		if (!CheckIfButtonIsPad(buffer_buttons1, Button7)) SetDevButton(hDev, 8, !!(buttons1 & Button7)); else SetDevButton(hDev, 8, 0);
+		
+		if (!CheckIfButtonIsPad(buffer_buttons2, Button0)) SetDevButton(hDev, 9,  !!(buttons2 & Button0)); else SetDevButton(hDev, 9, 0);
+		if (!CheckIfButtonIsPad(buffer_buttons2, Button1)) SetDevButton(hDev, 10, !!(buttons2 & Button1)); else SetDevButton(hDev, 10, 0);
+		if (!CheckIfButtonIsPad(buffer_buttons2, Button2)) SetDevButton(hDev, 11, !!(buttons2 & Button2)); else SetDevButton(hDev, 11, 0);
+		if (!CheckIfButtonIsPad(buffer_buttons2, Button3)) SetDevButton(hDev, 12, !!(buttons2 & Button3)); else SetDevButton(hDev, 12, 0);
 
-		SetDevButton(hDev, 1, !!(buttons & TrioDreamcast::A));
-		SetDevButton(hDev, 2, !!(buttons & TrioDreamcast::B));
-		SetDevButton(hDev, 3, !!(buttons & TrioDreamcast::X));
-		SetDevButton(hDev, 4, !!(buttons & TrioDreamcast::Y));
-		SetDevButton(hDev, 5, !!(buttons & TrioDreamcast::LT));
-		SetDevButton(hDev, 6, !!(buttons & TrioDreamcast::RT));
-		SetDevButton(hDev, 7, !!(buttons & TrioDreamcast::C));
-		SetDevButton(hDev, 8, !!(buttons & TrioDreamcast::Start));
-		SetDevButton(hDev, 9, !!(buttons & TrioDreamcast::Z));
-
-		SetDevButton(hDev, 10, !!(buttons & TrioDreamcast::Select));
-		SetDevButton(hDev, 11, !!(buttons & TrioDreamcast::Bit10));
-		SetDevButton(hDev, 12, !!(buttons & TrioDreamcast::Bit11));
+		if (!CheckIfButtonIsPad(buffer_buttons2, Button4)) SetDevButton(hDev, 13, !!(buttons2 & Button4)); else SetDevButton(hDev, 13, 0);
+		if (!CheckIfButtonIsPad(buffer_buttons2, Button5)) SetDevButton(hDev, 14, !!(buttons2 & Button5)); else SetDevButton(hDev, 14, 0);
+		if (!CheckIfButtonIsPad(buffer_buttons2, Button6)) SetDevButton(hDev, 15, !!(buttons2 & Button6)); else SetDevButton(hDev, 15, 0);
+		if (!CheckIfButtonIsPad(buffer_buttons2, Button7)) SetDevButton(hDev, 16, !!(buttons2 & Button7)); else SetDevButton(hDev, 16, 0);
 
 		if (!dPadAsButtons)
 		{
-			switch (buttons & TrioDreamcast::DPad)
-			{
-				default:
-					SetDevPov(hDev, 1, -1.0f);
-					break;
-
-				case Up:
-					SetDevPov(hDev, 1, 0.0f);
-					break;
-
-				case Up | Right:
-					SetDevPov(hDev, 1, 45.0f);
-					break;
-
-				case Right:
-					SetDevPov(hDev, 1, 90.0f);
-					break;
-
-				case Right | Down:
-					SetDevPov(hDev, 1, 135.0f);
-					break;
-
-				case Down:
-					SetDevPov(hDev, 1, 180.0f);
-					break;
-
-				case Down | Left:
-					SetDevPov(hDev, 1, 225.0f);
-					break;
-
-				case Left:
-					SetDevPov(hDev, 1, 270.0f);
-					break;
-
-				case Left | Up:
-					SetDevPov(hDev, 1, 315.0f);
-					break;
-			}
+			if (hat == hat_center) SetDevPov(hDev, 1, -1.0f);
+			else if (hat == hat_up) SetDevPov(hDev, 1, 0.0f);
+			else if (hat == hat_up_right) SetDevPov(hDev, 1, 45.0f);
+			else if (hat == hat_right) SetDevPov(hDev, 1, 90.0f);
+			else if (hat == hat_down_right) SetDevPov(hDev, 1, 135.0f);
+			else if (hat == hat_down) SetDevPov(hDev, 1, 180.0f);
+			else if (hat == hat_down_left) SetDevPov(hDev, 1, 225.0f);
+			else if (hat == hat_left) SetDevPov(hDev, 1, 270.0f);
+			else if (hat == hat_up_left) SetDevPov(hDev, 1, 315.0f);
+			else SetDevPov(hDev, 1, -1.0f);
 		}
-		else
-		{
-			SetDevButton(hDev, 13, !!(buttons & TrioDreamcast::Up));
-			SetDevButton(hDev, 14, !!(buttons & TrioDreamcast::Down));
-			SetDevButton(hDev, 15, !!(buttons & TrioDreamcast::Left));
-			SetDevButton(hDev, 16, !!(buttons & TrioDreamcast::Right));
-		}
+		else SetDevPov(hDev, 1, -1.0f);
 	}
 
 	if (hide)
@@ -296,9 +309,6 @@ HANDLE findTrio()
 			{
 				continue;
 			}
-
-			constexpr auto vendorID  = 0x7701;
-			constexpr auto productID = 0x0003;
 
 			if (attributes.VendorID != vendorID || attributes.ProductID != productID)
 			{
